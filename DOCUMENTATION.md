@@ -10,7 +10,7 @@
 
 1. Download the project:
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/shrivastava03/File-Uploader
 cd File_Uploader
 ```
 
