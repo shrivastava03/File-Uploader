@@ -1,3 +1,4 @@
+
 # File Uploader and Tracker - Documentation
 
 ## How to Set Up and Run This Project
@@ -40,8 +41,9 @@ This will start your backend on `http://127.0.0.1:8000`
 6. Start the frontend:
 I used VS Code's Live Server extension, but you can also use Python's built-in server:
 ```bash
-Open Upload.html in frontend folder and Open with Live Server.
-
+Open the frontend folder, go to Upload.html and Open with Live Server 
+```
+Open your browser and go to `http://127.0.0.1:5500`
 
 ### How I Organized the Files
 ```
@@ -137,3 +139,4 @@ I used Claude AI to help me with:
 - Updating my code to work with Pydantic V2
 
 But I wrote all the main logic myself, made all the design decisions, and wrote this documentation without AI help.
+
