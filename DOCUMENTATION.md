@@ -42,6 +42,7 @@ I used VS Code's Live Server extension, but you can also use Python's built-in s
 ```bash
 Open Upload.html in frontend folder and Open with Live Server.
 
+
 ### How I Organized the Files
 ```
 File_Uploader/
