@@ -40,10 +40,7 @@ This will start your backend on `http://127.0.0.1:8000`
 6. Start the frontend:
 I used VS Code's Live Server extension, but you can also use Python's built-in server:
 ```bash
-cd frontend
-python -m http.server 5500
-```
-Open your browser and go to `http://127.0.0.1:5500`
+Open Upload.html in frontend folder and Open with Live Server.
 
 ### How I Organized the Files
 ```
