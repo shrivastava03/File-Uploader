@@ -43,7 +43,6 @@ I used VS Code's Live Server extension, but you can also use Python's built-in s
 ```bash
 Open the frontend folder, go to Upload.html and Open with Live Server 
 ```
-Open your browser and go to `http://127.0.0.1:5500`
 
 ### How I Organized the Files
 ```
