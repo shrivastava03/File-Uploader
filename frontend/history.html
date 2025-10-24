@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Uploaded Files</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h2>File Upload History</h2>
+    <table border="1" cellspacing="0" cellpadding="8">
+      <thead>
+        <tr>
+          <th>Original Filename</th>
+          <th>Size (bytes)</th>
+          <th>Uploaded At</th>
+        </tr>
+      </thead>
+      <tbody id="fileTable"></tbody>
+    </table>
+    <a href="upload.html">Upload New File</a>
+  </div>
+
+  <script>
+    async function fetchFiles() {
+      const table = document.getElementById("fileTable");
+      const response = await fetch("http://127.0.0.1:8000/files/");
+      const files = await response.json();
+
+      table.innerHTML = "";
+      files.forEach(file => {
+        const row = `<tr>
+          <td>${file.original_filename}</td>
+          <td>${file.file_size_bytes}</td>
+          <td>${new Date(file.uploaded_at).toLocaleString()}</td>
+        </tr>`;
+        table.innerHTML += row;
+      });
+    }
+
+    fetchFiles();
+  </script>
+</body>
+</html>
