@@ -68,7 +68,7 @@ File_Uploader/
 ## My Design Decisions
 
 ### Why I Organized It This Way
-I split everything into `backend` and `frontend` folders to keep things clean and separate. The backend has different files for different jobs - one for database stuff, one for file uploads, etc. This makes it easier to find and fix things later.
+I split everything into `backend` and `frontend` folders to keep things clean and separate. The backend has different files for different jobs, one for database stuff, one for file uploads, etc. This makes it easier to find and fix things later.
 
 ### Important Choices I Made
 
@@ -77,7 +77,7 @@ I split everything into `backend` and `frontend` folders to keep things clean an
 I add a random UUID to the front of every filename.
 
 **Why I did this:**
-Think about it - if two people upload files named "resume.pdf", they'd overwrite each other! So I add a unique ID to each one. For example, if you upload "document.pdf", it gets saved as something like "a1b2c3d4-5678-90ab-cdef-1234567890ab_document.pdf". This way, no two files ever have the same name.
+Think about it, if two people upload files named "resume.pdf", they'd overwrite each other! So I added a unique ID to each one. For example, if you upload "document.pdf", it gets saved as something like "a1b2c3d4-5678-90ab-cdef-1234567890ab_document.pdf". This way, no two files ever have the same name.
 
 #### 2. Saving Files vs Saving Database Info
 **What I did:**
