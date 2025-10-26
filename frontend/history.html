@@ -1,44 +1,266 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Uploaded Files</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <div class="container">
-    <h2>File Upload History</h2>
-    <table border="1" cellspacing="0" cellpadding="8">
-      <thead>
-        <tr>
-          <th>Original Filename</th>
-          <th>Size (bytes)</th>
-          <th>Uploaded At</th>
-        </tr>
-      </thead>
-      <tbody id="fileTable"></tbody>
-    </table>
-    <a href="upload.html">Upload New File</a>
-  </div>
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Upload History</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-  <script>
-    async function fetchFiles() {
-      const table = document.getElementById("fileTable");
-      const response = await fetch("http://127.0.0.1:8000/files/");
-      const files = await response.json();
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
 
-      table.innerHTML = "";
-      files.forEach(file => {
-        const row = `<tr>
-          <td>${file.original_filename}</td>
-          <td>${file.file_size_bytes}</td>
-          <td>${new Date(file.uploaded_at).toLocaleString()}</td>
-        </tr>`;
-        table.innerHTML += row;
-      });
-    }
+      .container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        padding: 40px;
+        max-width: 900px;
+        width: 100%;
+      }
 
-    fetchFiles();
-  </script>
-</body>
-</html>
+      h2 {
+        color: #333;
+        margin-bottom: 30px;
+        font-size: 28px;
+        text-align: center;
+      }
+
+      .status {
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        text-align: center;
+        font-weight: 500;
+      }
+
+      .status.loading {
+        background: #e3f2fd;
+        color: #1976d2;
+      }
+
+      .status.error {
+        background: #ffebee;
+        color: #c62828;
+      }
+
+      .status.success {
+        background: #e8f5e9;
+        color: #2e7d32;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 30px;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      thead {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+      }
+
+      th {
+        padding: 16px;
+        text-align: left;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 12px;
+        letter-spacing: 1px;
+      }
+
+      td {
+        padding: 16px;
+        border-bottom: 1px solid #f0f0f0;
+        color: #555;
+      }
+
+      tbody tr {
+        transition: background 0.2s;
+      }
+
+      tbody tr:hover {
+        background: #f8f9fa;
+      }
+
+      tbody tr:last-child td {
+        border-bottom: none;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #999;
+      }
+
+      .empty-state svg {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 20px;
+        opacity: 0.5;
+      }
+
+      .btn {
+        display: inline-block;
+        padding: 14px 32px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: transform 0.2s, box-shadow 0.2s;
+        text-align: center;
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+      }
+
+      .btn-container {
+        text-align: center;
+      }
+
+      .file-size {
+        font-family: 'Courier New', monospace;
+        color: #666;
+      }
+
+      .date {
+        color: #888;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>📁 File Upload History</h2>
+      
+      <div id="status" class="status loading" style="display: none;">
+        Loading files...
+      </div>
+
+      <div id="tableContainer"></div>
+
+      <div class="btn-container">
+        <a href="upload.html" class="btn">⬆️ Upload New File</a>
+      </div>
+    </div>
+
+    <script>
+      const API_URL = "http://127.0.0.1:8000/files/";
+
+      // convert bytes to readable format
+      function formatBytes(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+      }
+
+      function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      function showStatus(msg, type) {
+        const statusEl = document.getElementById('status');
+        statusEl.textContent = msg;
+        statusEl.className = `status ${type}`;
+        statusEl.style.display = 'block';
+      }
+
+      function hideStatus() {
+        document.getElementById('status').style.display = 'none';
+      }
+
+      function renderEmptyState() {
+        return `
+          <div class="empty-state">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            <h3>No files uploaded yet</h3>
+            <p>Upload your first file to get started</p>
+          </div>
+        `;
+      }
+
+      function renderTable(files) {
+        let rows = '';
+        for(let i = 0; i < files.length; i++) {
+          const file = files[i];
+          rows += `
+          <tr>
+            <td>${escapeHtml(file.original_filename)}</td>
+            <td class="file-size">${formatBytes(file.file_size_bytes)}</td>
+            <td class="date">${new Date(file.uploaded_at).toLocaleString()}</td>
+          </tr>
+        `;
+        }
+
+        return `
+          <table>
+            <thead>
+              <tr>
+                <th>Original Filename</th>
+                <th>Size</th>
+                <th>Uploaded At</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows}
+            </tbody>
+          </table>
+        `;
+      }
+
+      async function fetchFiles() {
+        const container = document.getElementById('tableContainer');
+        
+        try {
+          showStatus('Loading files...', 'loading');
+          
+          const res = await fetch(API_URL);
+          
+          if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+          }
+          
+          const files = await res.json();
+          hideStatus();
+
+          if (files.length === 0) {
+            container.innerHTML = renderEmptyState();
+          } else {
+            container.innerHTML = renderTable(files);
+          }
+          
+        } catch (err) {
+          console.error('Error fetching files:', err);
+          showStatus(`Error loading files: ${err.message}`, 'error');
+          container.innerHTML = renderEmptyState();
+        }
+      }
+
+      fetchFiles();
+    </script>
+  </body>
+  </html>
